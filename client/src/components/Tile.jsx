@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import { getPieceSVG } from '../pieces/svg';
+import { getPieceSVG } from './svg';
 
 
 const Tile = ({ tile }) => {
@@ -7,8 +7,8 @@ const Tile = ({ tile }) => {
     const piece = tile.isOccupied ? tile.pieceColor + "_" + tile.piece : null
     const pieceSVG = piece ? getPieceSVG(piece) : null
     return (
-        <div className={"piece " + tileColor} >
-            {pieceSVG && <img src={pieceSVG} alt="" width="100%" />}
+        <div className={"tile " + tileColor} >
+            {pieceSVG && <div style={{ backgroundImage: `url(${pieceSVG})` }} className='piece' />}
         </div>
     )
 }
