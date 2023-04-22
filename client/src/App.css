@@ -1,8 +1,20 @@
 #chessboard {
   display: grid;
-  grid-template-columns: repeat(8, 100px);
-  grid-template-rows: repeat(8, 100px);
-  width: 800px;
-  height: 800px;
-  background-color: blue;
+  grid-template-columns: repeat(8, 1fr);
+  grid-template-rows: repeat(8, 1fr);
+  width: 600px;
+  height: 600px;
+  background-color: #769656;
+}
+
+.black-tile {
+  background-color: #769656;
+}
+.white-tile {
+  background-color: #eeeed2;
+}
+.piece {
+  display: flex;
+  justify-content: center;
+  /* margin:auto; */
 }
