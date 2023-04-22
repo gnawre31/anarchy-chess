@@ -13,8 +13,16 @@
 .white-tile {
   background-color: #eeeed2;
 }
-.piece {
+.tile {
   display: flex;
   justify-content: center;
   /* margin:auto; */
+}
+
+.piece { 
+  background-repeat: no-repeat;
+  height:100%;
+  width:100%;
+  background-position: center;
+  background-size: 100%;
 }
