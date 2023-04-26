@@ -1,9 +1,10 @@
-export const grabPiece = (e, board) => {
+export const grabPiece = (e) => {
   const activePiece = e.target;
-  if (activePiece.classList.contains("piece") && board) {
+  if (activePiece.classList.contains("piece")) {
     const x = e.clientX - 50;
     const y = e.clientY - 50;
     activePiece.style.position = "absolute";
+    activePiece.style.zIndex = "1000";
     activePiece.style.left = `${x}px`;
     activePiece.style.top = `${y}px`;
     activePiece.style.height = "80px";
@@ -11,50 +12,47 @@ export const grabPiece = (e, board) => {
   }
 };
 
-export const movePiece = (e, activePiece, board) => {
-  if (activePiece) {
-    const minX = board.offsetLeft - 15;
-    const minY = board.offsetTop - 10;
-    const maxX = board.offsetLeft + board.clientWidth - 70;
-    const maxY = board.offsetTop + board.clientHeight - 75;
-    const x = e.clientX - 50;
-    const y = e.clientY - 50;
-    activePiece.style.position = "absolute";
+export const movePiece = (e, activePiece, minX, maxX, minY, maxY) => {
+  const x = e.clientX - 50;
+  const y = e.clientY - 50;
+  activePiece.style.position = "absolute";
 
-    //If x is smaller than minimum amount
-    if (x < minX) {
-      activePiece.style.left = `${minX}px`;
-    }
-    //If x is bigger than maximum amount
-    else if (x > maxX) {
-      activePiece.style.left = `${maxX}px`;
-    }
-    //If x is in the constraints
-    else {
-      activePiece.style.left = `${x}px`;
-    }
+  //If x is smaller than minimum amount
+  if (x < minX) {
+    activePiece.style.left = `${minX}px`;
+  }
+  //If x is bigger than maximum amount
+  else if (x > maxX - 75) {
+    activePiece.style.left = `${maxX - 75}px`;
+  }
+  //If x is in the constraints
+  else {
+    activePiece.style.left = `${x}px`;
+  }
 
-    //If y is smaller than minimum amount
-    if (y < minY) {
-      activePiece.style.top = `${minY}px`;
-    }
-    //If y is bigger than maximum amount
-    else if (y > maxY) {
-      activePiece.style.top = `${maxY}px`;
-    }
-    //If y is in the constraints
-    else {
-      activePiece.style.top = `${y}px`;
-    }
+  //If y is smaller than minimum amount
+  if (y < minY) {
+    activePiece.style.top = `${minY}px`;
+  }
+  //If y is bigger than maximum amount
+  else if (y > maxY - 75) {
+    activePiece.style.top = `${maxY - 75}px`;
+  }
+  //If y is in the constraints
+  else {
+    activePiece.style.top = `${y}px`;
   }
 };
 
-export const dropPiece = (e, board) => {
+export const dropPiece = (e, minX, maxX, minY, maxY) => {
   const activePiece = e.target;
-  if (activePiece && board) {
-    const x = Math.floor((e.clientX - board.offsetLeft) / 80);
-    const y = Math.abs(Math.ceil((e.clientY - board.offsetTop - 600) / 80));
-
-    console.log(x, y);
-  }
+  const x = Math.floor(((e.clientX - minX) * 8) / (maxX - minX));
+  const y = 7 - Math.floor(((e.clientY - minY) * 8) / (maxY - minY));
+  activePiece.style.position = "relative";
+  activePiece.style.removeProperty("top");
+  activePiece.style.removeProperty("left");
+  activePiece.style.removeProperty("height");
+  activePiece.style.removeProperty("width");
+  activePiece.style.removeProperty("zIndex");
+  return { x, y };
 };
