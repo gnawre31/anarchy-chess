@@ -5,61 +5,61 @@
                 "pos": "A1",
                 "x":0,
                 "y":0,
-                "piece": "ROOK",
-                "pieceColor": "W",
-                "isOccupied": true
+                "piece": null,
+                "pieceColor": null,
+                "isOccupied": false
             },
             {
                 "pos": "B1",
                 "x":1,
                 "y":0,
-                "piece": "KNIGHT",
-                "pieceColor": "W",
-                "isOccupied": true
+                "piece": null,
+                "pieceColor": null,
+                "isOccupied": false
             },
             {
                 "pos": "C1",
                 "x":2,
                 "y":0,
-                "piece": "BISHOP",
-                "pieceColor": "W",
-                "isOccupied": true
+                "piece": null,
+                "pieceColor": null,
+                "isOccupied": false
 
             },
             {
                 "pos": "D1",
                 "x":3,
                 "y":0,
-                "piece": "QUEEN",
-                "pieceColor": "W",
-                "isOccupied": true
+                "piece": null,
+                "pieceColor": null,
+                "isOccupied": false
 
             },
             {
                 "pos": "E1",
                 "x":4,
                 "y":0,
-                "piece": "KING",
-                "pieceColor": "W",
-                "isOccupied": true
+                "piece": null,
+                "pieceColor": null,
+                "isOccupied": false
 
             },
             {
                 "pos": "F1",
                 "x":5,
                 "y":0,
-                "piece": "BISHOP",
-                "pieceColor": "W",
-                "isOccupied": true
+                "piece": null,
+                "pieceColor": null,
+                "isOccupied": false
 
             },
             {
                 "pos": "G1",
                 "x":6,
                 "y":0,
-                "piece": "KNIGHT",
-                "pieceColor": "W",
-                "isOccupied": true
+                "piece": null,
+                "pieceColor": null,
+                "isOccupied": false
 
 
             },
@@ -67,9 +67,9 @@
                 "pos": "H1",
                 "x":7,
                 "y":0,
-                "piece": "ROOK",
-                "pieceColor": "W",
-                "isOccupied": true
+                "piece": null,
+                "pieceColor": null,
+                "isOccupied": false
 
             }
         ],
@@ -78,72 +78,72 @@
                 "pos": "A2",
                 "x":0,
                 "y":1,
-                "piece": "PAWN",
-                "pieceColor": "W",
-                "isOccupied": true
+                "piece": null,
+                "pieceColor": null,
+                "isOccupied": false
 
             },
             {
                 "pos": "B2",
                 "x":1,
                 "y":1,
-                "piece": "PAWN",
-                "pieceColor": "W",
-                "isOccupied": true
+                "piece": null,
+                "pieceColor": null,
+                "isOccupied": false
 
             },
             {
                 "pos": "C2",
                 "x":2,
                 "y":1,
-                "piece": "PAWN",
-                "pieceColor": "W",
-                "isOccupied": true
+                "piece": null,
+                "pieceColor": null,
+                "isOccupied": false
 
             },
             {
                 "pos": "D2",
                 "x":3,
                 "y":1,
-                "piece": "PAWN",
-                "pieceColor": "W",
-                "isOccupied": true
+                "piece": null,
+                "pieceColor": null,
+                "isOccupied": false
 
             },
             {
                 "pos": "E2",
                 "x":4,
                 "y":1,
-                "piece": "PAWN",
-                "pieceColor": "W",
-                "isOccupied": true
+                "piece": null,
+                "pieceColor": null,
+                "isOccupied": false
 
             },
             {
                 "pos": "F2",
                 "x":5,
                 "y":1,
-                "piece": "PAWN",
-                "pieceColor": "W",
-                "isOccupied": true
+                "piece": null,
+                "pieceColor": null,
+                "isOccupied": false
 
             },
             {
                 "pos": "G2",
                 "x":6,
                 "y":1,
-                "piece": "PAWN",
-                "pieceColor": "W",
-                "isOccupied": true
+                "piece": null,
+                "pieceColor": null,
+                "isOccupied": false
 
             },
             {
                 "pos": "H2",
                 "x":7,
                 "y":1,
-                "piece": "PAWN",
-                "pieceColor": "W",
-                "isOccupied": true
+                "piece": null,
+                "pieceColor": null,
+                "isOccupied": false
 
             }
         ],
@@ -448,72 +448,72 @@
                 "pos": "A7",
                 "x":0,
                 "y":6,
-                "piece": "PAWN",
-                "pieceColor": "B",
-                "isOccupied": true
+                "piece": null,
+                "pieceColor": null,
+                "isOccupied": false
 
             },
             {
                 "pos": "B7",
                 "x":1,
                 "y":6,
-                "piece": "PAWN",
-                "pieceColor": "B",
-                "isOccupied": true
+                "piece": null,
+                "pieceColor": null,
+                "isOccupied": false
                 
             },
             {
                 "pos": "C7",
                 "x":2,
                 "y":6,
-                "piece": "PAWN",
-                "pieceColor": "B",
-                "isOccupied": true
+                "piece": null,
+                "pieceColor": null,
+                "isOccupied": false
 
             },
             {
                 "pos": "D7",
                 "x":3,
                 "y":6,
-                "piece": "PAWN",
-                "pieceColor": "B",
-                "isOccupied": true
+                "piece": null,
+                "pieceColor": null,
+                "isOccupied": false
 
             },
             {
                 "pos": "E7",
                 "x":4,
                 "y":6,
-                "piece": "PAWN",
-                "pieceColor": "B",
-                "isOccupied": true
+                "piece": null,
+                "pieceColor": null,
+                "isOccupied": false
 
             },
             {
                 "pos": "F7",
                 "x":5,
                 "y":6,
-                "piece": "PAWN",
-                "pieceColor": "B",
-                "isOccupied": true
+                "piece": null,
+                "pieceColor": null,
+                "isOccupied": false
 
             },
             {
                 "pos": "G7",
                 "x":6,
                 "y":6,
-                "piece": "PAWN",
-                "pieceColor": "B",
-                "isOccupied": true
+                "piece": null,
+                "pieceColor": null,
+                "isOccupied": false
 
             },
             {
                 "pos": "H7",
                 "x":7,
                 "y":6,
-                "piece": "PAWN",
-                "pieceColor": "B",
-                "isOccupied": true
+                "piece": null,
+                "pieceColor": null,
+                "isOccupied": false
 
             }
         ],
@@ -522,72 +522,72 @@
                 "pos": "A8",
                 "x":0,
                 "y":7,
-                "piece": "ROOK",
-                "pieceColor": "B",
-                "isOccupied": true
+                "piece": null,
+                "pieceColor": null,
+                "isOccupied": false
 
             },
             {
                 "pos": "B8",
                 "x":1,
                 "y":7,
-                "piece": "KNIGHT",
-                "pieceColor": "B",
-                "isOccupied": true
+                "piece": null,
+                "pieceColor": null,
+                "isOccupied": false
 
             },
             {
                 "pos": "C8",
                 "x":2,
                 "y":7,
-                "piece": "BISHOP",
-                "pieceColor": "B",
-                "isOccupied": true
+                "piece": null,
+                "pieceColor": null,
+                "isOccupied": false
 
             },
             {
                 "pos": "8",
                 "x":3,
                 "y":7,
-                "piece": "QUEEN",
-                "pieceColor": "B",
-                "isOccupied": true
+                "piece": null,
+                "pieceColor": null,
+                "isOccupied": false
 
             },
             {
                 "pos": "E8",
                 "x":4,
                 "y":7,
-                "piece": "KING",
-                "pieceColor": "B",
-                "isOccupied": true
+                "piece": null,
+                "pieceColor": null,
+                "isOccupied": false
 
             },
             {
                 "pos": "F8",
                 "x":5,
                 "y":7,
-                "piece": "BISHOP",
-                "pieceColor": "B",
-                "isOccupied": true
+                "piece": null,
+                "pieceColor": null,
+                "isOccupied": false
 
             },
             {
                 "pos": "G8",
                 "x":6,
                 "y":7,
-                "piece": "KNIGHT",
-                "pieceColor": "B",
-                "isOccupied": true
+                "piece": null,
+                "pieceColor": null,
+                "isOccupied": false
 
             },
             {
                 "pos": "H8",
                 "x":7,
                 "y":7,
-                "piece": "ROOK",
-                "pieceColor": "B",
-                "isOccupied": true
+                "piece": null,
+                "pieceColor": null,
+                "isOccupied": false
 
             }
         ]
