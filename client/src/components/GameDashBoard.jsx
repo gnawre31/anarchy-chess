@@ -1,6 +1,7 @@
 
 import { useChessStore } from '../store'
 import CapturedPieces from './CapturedPieces'
+import PawnPromoModal from './PawnPromoModal'
 
 const GameDashBoard = () => {
     const newGame = useChessStore(state => state.newGame)
@@ -9,6 +10,8 @@ const GameDashBoard = () => {
     const turn = useChessStore(state => state.turn)
     const capturedBPieces = useChessStore(state => state.capturedBPieces)
     const capturedWPieces = useChessStore(state => state.capturedWPieces)
+
+    const pawnPromoModal = useChessStore(state => state.pawnPromoModal)
 
     const startGame = () => {
         const game = {
@@ -25,7 +28,7 @@ const GameDashBoard = () => {
             <CapturedPieces pieces={capturedBPieces} color="B" />
             <p>Black:</p>
             <CapturedPieces pieces={capturedWPieces} color="W" />
-
+            <PawnPromoModal pawnPromoModal={pawnPromoModal} />
 
 
         </div>

@@ -1,9 +1,9 @@
 import PropTypes from "prop-types";
 import { getPieceSVG } from "./svg";
-import { dropPiece, grabPiece } from "./pieceDragAndDrop";
+import { dropPiece, grabPiece } from "../game/pieceDragAndDrop";
 import { useChessStore } from "../store";
 import { useEffect, useState } from "react";
-import { getValidMoves, isValidMove } from "./moves";
+import { getValidMoves, isValidMove } from "../game/moves";
 
 const Tile = ({ tile }) => {
 
@@ -25,9 +25,11 @@ const Tile = ({ tile }) => {
     const currTurn = useChessStore(state => state.currTurn)
     const incrementTurn = useChessStore(state => state.incrementTurn)
     const moveHistory = useChessStore(state => state.moveHistory)
+    const openPawnPromoModal = useChessStore(state => state.openPawnPromoModal)
 
 
-
+    const setPromoMove = useChessStore(state => state.setPromoMove)
+    const promoMove = useChessStore(state => state.promoMove)
 
 
     // tile css valid move 
@@ -66,6 +68,7 @@ const Tile = ({ tile }) => {
 
 
     const onClick = async (e) => {
+
         if (activePiece == null) {
             if (tile.pieceColor === currTurn) {
                 setActivePiece(e.target);
@@ -89,9 +92,14 @@ const Tile = ({ tile }) => {
                 pieceColor: tile.pieceColor,
                 capturedPiece: capturedPiece
             }
+            const isAValidMove = await isValidMove(move, validMoves)
 
-            const isValid = await isValidMove(move, validMoves)
-            if (isValid) {
+            //  pawn promotion
+            if (move.piece === "PAWN" && (move.newY === 0 || move.newY === 7)) {
+                await setPromoMove(move)
+                await openPawnPromoModal()
+            }
+            else if (isAValidMove) {
                 // committing move will move the piece to new tile coordinates
                 await commitMove(move)
 
@@ -102,8 +110,8 @@ const Tile = ({ tile }) => {
                 // 4. checks if piece has been captured. Update captured if so
                 await incrementTurn(move)
             }
-            setValidMoves([])
-            setActivePiece(null);
+
+
         }
     };
 
@@ -120,7 +128,14 @@ const Tile = ({ tile }) => {
                 <div
                     style={{ backgroundImage: `url(${pieceSVG})` }}
                     className="piece"
-                    onClick={(e) => onClick(e)}
+                    onClick={(e) => onClick(e).then(() => {
+                        // reset flags if a piece was dropped
+                        if (activePiece) {
+                            setValidMoves([])
+                            setActivePiece(null);
+                        }
+
+                    })}
                 />
             )}
         </div>
