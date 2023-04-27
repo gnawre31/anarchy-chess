@@ -68,9 +68,39 @@
   background-size: 100%;
 }
 
+.piece-promo { 
+  background-repeat: no-repeat;
+  height:70px;
+  width:70px;
+  background-position: center;
+  background-size: 100%;
+  border-radius: 10px;
+}
+.piece-promo:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+}
+
 .piece:hover { 
   cursor: grab;
 }
 .piece:active{
   cursor: grabbing;
+}
+
+.modal-container {
+width: 100vw;
+height: 100vh;
+position: absolute;
+background-color: rgba(0, 0, 0, 0.2);
+z-index: 1000;
+}
+
+.modal {
+  width: 70px;
+  height: 280px;
+  background-color: white;
+  margin-left:750px;
+  margin-top:200px;
+  border-radius: 10px;
 }

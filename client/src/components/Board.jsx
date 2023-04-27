@@ -1,12 +1,11 @@
 import Tile from "./Tile";
 import { useChessStore } from "../store";
 import { useEffect, useRef } from "react";
-import { movePiece } from "./pieceDragAndDrop";
+import { movePiece } from "../game/pieceDragAndDrop";
 
 const Board = () => {
   const board = useChessStore((state) => state.board);
   const setBoard = useChessStore(state => state.setBoard)
-  // const isPlaying = useChessStore((state) => state.isPlaying);
   const activePiece = useChessStore((state) => state.activePiece);
   const setBoardCoords = useChessStore(state => state.setBoardCoords)
 
@@ -14,6 +13,7 @@ const Board = () => {
   const maxX = useChessStore((state) => state.maxX);
   const minY = useChessStore((state) => state.minY);
   const maxY = useChessStore((state) => state.maxY);
+
 
 
 
@@ -39,7 +39,7 @@ const Board = () => {
       maxY: chessboardRect.bottom
     }
     setBoardCoords(boardCoords)
-  }, [])
+  }, [setBoard, setBoardCoords])
 
 
 

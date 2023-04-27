@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { BLACK, FILES, RANKS, WHITE } from "./types";
 import newBoard from "./newBoard.json";
+import { getScoreInc } from "./game/scoring";
 
 export const useChessStore = create((set) => ({
   board: [],
@@ -55,7 +56,6 @@ export const useChessStore = create((set) => ({
       board: initBoard,
       isPlaying: false,
       playerColor: playerColor,
-      canCastle: false,
     }));
   },
 
@@ -66,33 +66,53 @@ export const useChessStore = create((set) => ({
   maxY: 0,
   activePiece: null,
   activeTile: null,
-  setActiveTile: (activeTile) => {
+  setActiveTile: (activeTile) =>
     set(() => ({
       activeTile: activeTile,
-    }));
-  },
-  setActivePiece: (activePiece) => {
+    })),
+
+  setActivePiece: (activePiece) =>
     set(() => ({
       activePiece: activePiece,
-    }));
-  },
-  setBoardCoords: (boardCoords) => {
+    })),
+
+  setBoardCoords: (boardCoords) =>
     set(() => ({
       minX: boardCoords.minX,
       maxX: boardCoords.maxX,
       minY: boardCoords.minY,
       maxY: boardCoords.maxY,
-    }));
-  },
-
-  validMoves: [],
-  setValidMoves: (validMoves) => {
-    set(() => ({
-      validMoves: validMoves,
-    }));
-  },
+    })),
 
   // game functions
+  // store list of valid moves for active piece
+  validMoves: [],
+  setValidMoves: (validMoves) =>
+    set(() => ({
+      validMoves: validMoves,
+    })),
+
+  // PROMOTE PAWN
+  promotePawn: ({ x, y, piece }) => {
+    set((state) => ({
+      board: state.board.map((t) => {
+        if (t.x === x && t.y === y) {
+          return {
+            ...t,
+            piece: piece,
+          };
+        }
+      }),
+    }));
+  },
+
+  pawnPromoModal: false,
+  openPawnPromoModal: () => set(() => ({ pawnPromoModal: true })),
+  closePawnPromoModal: () => set(() => ({ pawnPromoModal: false })),
+
+  promoMove: null,
+  setPromoMove: (move) => set(() => ({ promoMove: move })),
+
   // INCREMENT TURN
   incrementTurn: (move) => {
     const capturedColor = move.capturedPiece.pieceColor === "W" ? "W" : "B";
@@ -197,6 +217,11 @@ export const useChessStore = create((set) => ({
       opponentId: opponentId,
       canLongCastle: true,
       canShortCastle: true,
+      moveHistory: [],
+      turn: 0,
+      currTurn: "W",
+      score: 0,
+      activePiece: null,
       capturedWPieces: [
         { piece: "PAWN", count: [] },
         { piece: "ROOK", count: [] },
@@ -214,15 +239,3 @@ export const useChessStore = create((set) => ({
     }));
   },
 }));
-
-const getScoreInc = (capturedColor, capturedPiece) => {
-  if (capturedPiece === null) return 0;
-  let score = 0;
-  if (capturedPiece === "PAWN") score = 1;
-  if (capturedPiece === "ROOK") score = 5;
-  if (capturedPiece === "KNIGHT") score = 3;
-  if (capturedPiece === "BISHOP") score = 3;
-  if (capturedPiece === "QUEEN") score = 9;
-  if (capturedColor === "B") score *= -1;
-  return score;
-};

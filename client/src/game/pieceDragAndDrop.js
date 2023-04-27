@@ -4,7 +4,7 @@ export const grabPiece = (e) => {
     const x = e.clientX - 50;
     const y = e.clientY - 50;
     activePiece.style.position = "absolute";
-    activePiece.style.zIndex = "1000";
+    activePiece.style.zIndex = "100";
     activePiece.style.left = `${x}px`;
     activePiece.style.top = `${y}px`;
     activePiece.style.height = "80px";

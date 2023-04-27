@@ -80,11 +80,7 @@ const validPawnMoves = async (x, y, pieceColor, oppColor, board, isChecked) => {
 
   xMoves.forEach(async (xIncrement) => {
     let newX = x + xIncrement;
-    console.log(newX);
-
     const canAttack = await isTileOccupiedByOpp(newX, newY, oppColor, board);
-    console.log(canAttack);
-
     if (canAttack) validMoves.push({ x: newX, y: newY });
   });
 
