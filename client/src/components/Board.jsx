@@ -16,6 +16,7 @@ const Board = () => {
   const maxY = useChessStore((state) => state.maxY);
 
 
+
   const chessboardRef = useRef(null);
 
   const onMove = (e) => {

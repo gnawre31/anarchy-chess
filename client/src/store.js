@@ -10,16 +10,27 @@ export const useChessStore = create((set) => ({
   playerId: null,
   playerColor: null,
   opponentId: null,
-  playerPieces: [],
-  opponentPieces: [],
-  playerPiecesTaken: [],
-  opponentPiecesTaken: [],
-  playerScore: 0,
-  opponentScore: 0,
+  capturedWPieces: [
+    { piece: "PAWN", count: [] },
+    { piece: "KNIGHT", count: [] },
+    { piece: "BISHOP", count: [] },
+    { piece: "ROOK", count: [] },
+    { piece: "QUEEN", count: [] },
+  ],
+  capturedBPieces: [
+    { piece: "PAWN", count: [] },
+    { piece: "KNIGHT", count: [] },
+    { piece: "BISHOP", count: [] },
+    { piece: "ROOK", count: [] },
+    { piece: "QUEEN", count: [] },
+  ],
+  score: 0,
   canLongCastle: false,
   canShortCastle: false,
   isChecked: false,
   turn: 0,
+  currTurn: "W",
+  moveHistory: [],
 
   // board set up
   setBoard: () => {
@@ -82,9 +93,37 @@ export const useChessStore = create((set) => ({
   },
 
   // game functions
+  // INCREMENT TURN
+  incrementTurn: (move) => {
+    const capturedColor = move.capturedPiece.pieceColor === "W" ? "W" : "B";
+    const capturedPiece = move.capturedPiece.piece;
+    const scoreInc = getScoreInc(capturedColor, capturedPiece);
+    set((state) => ({
+      turn: state.turn + 1,
+      currTurn: state.currTurn === "W" ? "B" : "W",
+      moveHistory: [...state.moveHistory, move],
+      score: state.score + scoreInc,
+      capturedBPieces:
+        capturedColor === "B"
+          ? state.capturedBPieces.map((p) => {
+              if (p.piece === capturedPiece) {
+                return { piece: p.piece, count: [...p.count, true] };
+              } else return p;
+            })
+          : state.capturedBPieces,
+      capturedWPieces:
+        capturedColor === "W"
+          ? state.capturedWPieces.map((p) => {
+              if (p.piece === capturedPiece) {
+                return { piece: p.piece, count: [...p.count, true] };
+              } else return p;
+            })
+          : state.capturedWPieces,
+    }));
+  },
 
   // MOVE PIECE
-  movePiece: (p) => {
+  commitMove: (p) => {
     const { oldX, oldY, newX, newY, piece, pieceColor } = p;
     set((state) => ({
       board: state.board.map((t) => {
@@ -158,6 +197,32 @@ export const useChessStore = create((set) => ({
       opponentId: opponentId,
       canLongCastle: true,
       canShortCastle: true,
+      capturedWPieces: [
+        { piece: "PAWN", count: [] },
+        { piece: "ROOK", count: [] },
+        { piece: "KNIGHT", count: [] },
+        { piece: "BISHOP", count: [] },
+        { piece: "QUEEN", count: [] },
+      ],
+      capturedBPieces: [
+        { piece: "PAWN", count: [] },
+        { piece: "ROOK", count: [] },
+        { piece: "KNIGHT", count: [] },
+        { piece: "BISHOP", count: [] },
+        { piece: "QUEEN", count: [] },
+      ],
     }));
   },
 }));
+
+const getScoreInc = (capturedColor, capturedPiece) => {
+  if (capturedPiece === null) return 0;
+  let score = 0;
+  if (capturedPiece === "PAWN") score = 1;
+  if (capturedPiece === "ROOK") score = 5;
+  if (capturedPiece === "KNIGHT") score = 3;
+  if (capturedPiece === "BISHOP") score = 3;
+  if (capturedPiece === "QUEEN") score = 9;
+  if (capturedColor === "B") score *= -1;
+  return score;
+};
