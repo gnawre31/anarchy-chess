@@ -1,24 +1,13 @@
 import './App.css'
 import Board from './components/Board'
-import { useChessStore } from './store'
-
+import GameDashBoard from './components/GameDashBoard'
 
 
 function App() {
-  const newGame = useChessStore(state => state.newGame)
-  const board = useChessStore(state => state.board)
-  const startGame = () => {
-    const game = {
-      roomId: 123, gameId: 456, playerId: 789, playerColor: 'WHITE', opponentId: 1, board: board
-    }
-    // clearBoard()
-    newGame(game)
-  }
-
   return (
-    <div>
-      <button onClick={startGame}>New Game</button>
+    <div className='game'>
       <Board />
+      <GameDashBoard />
     </div>
   )
 }

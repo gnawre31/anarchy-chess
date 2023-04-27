@@ -2,6 +2,9 @@
   margin:0;
   padding:0;
 }
+.game {
+  display: flex
+}
 .unselectable {
   -moz-user-select: -moz-none;
   -khtml-user-select: none;
