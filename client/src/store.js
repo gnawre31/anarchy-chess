@@ -28,9 +28,11 @@ export const useChessStore = create((set) => ({
   score: 0,
   canLongCastle: false,
   canShortCastle: false,
-  isChecked: false,
+  checked: false,
   turn: 0,
   currTurn: "W",
+  wChecked: false,
+  bChecked: false,
   moveHistory: [],
 
   // board set up
@@ -85,11 +87,21 @@ export const useChessStore = create((set) => ({
     })),
 
   // game functions
+
+  // set state to checked/uncheck
+  // this is true when a king piece is checked by another piece
+  // and false when the king is not in check
+  setChecked: (checked) =>
+    set((state) => ({
+      wChecked: state.currTurn === "W" ? checked : state.wChecked,
+      bChecked: state.currTurn === "B" ? checked : state.bChecked,
+    })),
+
   // store list of valid moves for active piece
-  validMoves: [],
-  setValidMoves: (validMoves) =>
+  validActions: { validMoves: [], validAttacks: [] },
+  setValidActions: (validActions) =>
     set(() => ({
-      validMoves: validMoves,
+      validActions: validActions,
     })),
 
   // PROMOTE PAWN
@@ -114,7 +126,7 @@ export const useChessStore = create((set) => ({
   setPromoMove: (move) => set(() => ({ promoMove: move })),
 
   // INCREMENT TURN
-  incrementTurn: (move) => {
+  incrementTurn: async (move) => {
     const capturedColor = move.capturedPiece.pieceColor === "W" ? "W" : "B";
     const capturedPiece = move.capturedPiece.piece;
     const scoreInc = getScoreInc(capturedColor, capturedPiece);
@@ -143,7 +155,7 @@ export const useChessStore = create((set) => ({
   },
 
   // MOVE PIECE
-  commitMove: (p) => {
+  commitMove: async (p) => {
     const { oldX, oldY, newX, newY, piece, pieceColor } = p;
     set((state) => ({
       board: state.board.map((t) => {
@@ -196,7 +208,7 @@ export const useChessStore = create((set) => ({
         if (t.y < 2) p.pieceColor = "W";
         else p.pieceColor = "B";
 
-        // pawns
+        // // pawns
         if (t.y === 1 || t.y === 6) p.piece = "PAWN";
         // other pieces
         if (t.y === 0 || t.y === 7) {
