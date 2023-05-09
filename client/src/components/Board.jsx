@@ -2,6 +2,7 @@ import Tile from "./Tile";
 import { useChessStore } from "../store";
 import { useEffect, useRef } from "react";
 import { movePiece } from "../game/pieceDragAndDrop";
+import { isKingInCheck } from "../game/moves";
 
 const Board = () => {
   const board = useChessStore((state) => state.board);
@@ -13,6 +14,12 @@ const Board = () => {
   const maxX = useChessStore((state) => state.maxX);
   const minY = useChessStore((state) => state.minY);
   const maxY = useChessStore((state) => state.maxY);
+
+  const currTurn = useChessStore((state) => state.currTurn);
+  const canLongCastle = useChessStore((state) => state.canLongCastle);
+  const canShortCastle = useChessStore((state) => state.canShortCastle);
+  const setChecked = useChessStore((state) => state.setChecked);
+  const turn = useChessStore((state) => state.turn);
 
 
 
@@ -42,6 +49,11 @@ const Board = () => {
   }, [setBoard, setBoardCoords])
 
 
+  // set wChecked and bChecked (boolean) values whenever a move is made
+  // checked values are used for tile styling
+  useEffect(() => {
+    isKingInCheck(currTurn, board, canLongCastle, canShortCastle).then(checked => setChecked(checked))
+  }, [currTurn, board, canLongCastle, canShortCastle, turn, setChecked, activePiece])
 
 
   return (

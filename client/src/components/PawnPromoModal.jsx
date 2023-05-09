@@ -12,6 +12,7 @@ const PawnPromoModal = ({ pawnPromoModal }) => {
     const commitMove = useChessStore(state => state.commitMove)
     const incrementTurn = useChessStore(state => state.incrementTurn)
 
+
     const pieces = ["KNIGHT", "BISHOP", "ROOK", "QUEEN"]
 
     const closeModal = async () => {

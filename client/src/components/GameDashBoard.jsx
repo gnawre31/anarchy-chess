@@ -12,6 +12,8 @@ const GameDashBoard = () => {
     const capturedWPieces = useChessStore(state => state.capturedWPieces)
 
     const pawnPromoModal = useChessStore(state => state.pawnPromoModal)
+    const wChecked = useChessStore(state => state.wChecked)
+    const bChecked = useChessStore(state => state.bChecked)
 
     const startGame = () => {
         const game = {
@@ -29,6 +31,9 @@ const GameDashBoard = () => {
             <p>Black:</p>
             <CapturedPieces pieces={capturedWPieces} color="W" />
             <PawnPromoModal pawnPromoModal={pawnPromoModal} />
+            <p>White in check: {wChecked ? "True" : "False"}</p>
+            <p>Black in check: {bChecked ? "True" : "False"}</p>
+
 
 
         </div>
