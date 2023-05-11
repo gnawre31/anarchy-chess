@@ -8,6 +8,38 @@ const isTileOccupiedByOpp = async (x, y, oppColor, board) => {
   return tile.pieceColor === oppColor;
 };
 
+const multiplePiecesCanMoveToSameSpot = async (
+  oldX,
+  oldY,
+  newX,
+  newY,
+  piece,
+  pieceColor,
+  board
+) => {
+  let otherEligiblePieces = [];
+  const otherPieces = await board.filter(
+    (t) =>
+      t.piece === piece &&
+      t.pieceColor === pieceColor &&
+      ((t.x !== oldX) ^ (t.y !== oldY) || (t.x !== oldX && t.y !== oldY))
+  );
+  if (otherPieces.length > 0) {
+    for await (const p of otherPieces) {
+      const actions = await getValidMoves(p, board, false, false);
+      const sameMove = await actions.validMoves.find(
+        (m) => m.x === newX && m.y === newY
+      );
+      const sameAttack = await actions.validMoves.find(
+        (m) => m.x === newX && m.y === newY
+      );
+      if (sameMove != null || sameAttack != null) otherEligiblePieces.push(p);
+    }
+  }
+
+  return otherEligiblePieces;
+};
+
 // return piece that is captured
 export const getPiece = async (x, y, board) => {
   const t = await board.find((t) => t.x === x && t.y === y);
@@ -554,4 +586,165 @@ export const isKingInCheck = async (
     }
   }
   return checked;
+};
+
+export const getMoveNotation = async (
+  oldX,
+  oldY,
+  newX,
+  newY,
+  piece,
+  pieceColor,
+  capturedPiece,
+  promotedTo,
+  board
+) => {
+  /*
+  CHESS NOTATION: piece + original position + capture + new position + pawn promotion + check/checkmate
+  eg. Rxf8, e5, Qxa5#, Ke2, h8=Q+, exd4 Nde6
+
+  exception - castling
+  Short castle: "O-O"
+  Long castle: "O-O-O"
+  
+  PIECE:
+  pawn: ""
+  rook: "R"
+  knight: "N"
+  bishop: "B"
+  queen: "Q"
+  king: "K"
+
+  CAPTURE:
+  a piece is captured: "x"
+  no capture: ""
+
+  POSITION:
+  position: fileRank (eg. a1, f5, e4)
+
+  CHECK/CHECKMATE:
+  no check ""
+  check: "+"
+  checkmate: "#"
+
+  */
+  let pieceNotation = "";
+  let oldPosNotation = "";
+  let captureNotation = "";
+  let newPosNotation = "";
+  let pawnPromoNotation = "";
+  let checkNotation = "";
+  const oldTile = await board.find((t) => t.x === oldX && t.y === oldY);
+  const newTile = await board.find((t) => t.x === newX && t.y === newY);
+
+  // PIECE
+  switch (piece) {
+    case "ROOK":
+      pieceNotation = "R";
+      break;
+    case "KNIGHT":
+      pieceNotation = "N";
+      break;
+    case "BISHOP":
+      pieceNotation = "B";
+      break;
+    case "QUEEN":
+      pieceNotation = "Q";
+      break;
+    case "KING":
+      pieceNotation = "K";
+      break;
+    default:
+      break;
+  }
+
+  // ORIGINAL POSITION - only if there are multiple pieces of the same type that can move to the same spot
+  const samePieces = await multiplePiecesCanMoveToSameSpot(
+    oldX,
+    oldY,
+    newX,
+    newY,
+    piece,
+    pieceColor,
+    board
+  );
+  let sameX = false;
+  let sameY = false;
+  if (samePieces.length > 0) {
+    for await (const p of samePieces) {
+      if (oldX === p.x) sameX = true;
+      if (oldY === p.y) sameY = true;
+    }
+    if (sameX && sameY) oldPosNotation = oldTile.pos;
+    else if (sameX) oldPosNotation = oldTile.pos[1];
+    else oldPosNotation = oldTile.pos[0];
+  }
+
+  // CAPTURE
+  if (capturedPiece.piece) {
+    // PAWN CAPTURE
+    if (piece === "PAWN") oldPosNotation = oldTile.pos[0];
+
+    captureNotation = "x";
+  }
+
+  // NEW POSITION
+  newPosNotation = newTile.pos;
+
+  // PAWN PROMOTION
+  if (promotedTo != null) {
+    switch (promotedTo) {
+      case "ROOK":
+        pawnPromoNotation = "=R";
+        break;
+      case "KNIGHT":
+        pawnPromoNotation = "=N";
+        break;
+      case "BISHOP":
+        pawnPromoNotation = "=B";
+        break;
+      case "QUEEN":
+        pawnPromoNotation = "=Q";
+        break;
+      default:
+        break;
+    }
+  }
+
+  // CHECK
+  const oppColor = pieceColor === "W" ? "B" : "W";
+  const newBoard = await board.map((t) => {
+    if (t.x === oldX && t.y === oldY) {
+      return {
+        ...t,
+        piece: null,
+        pieceColor: null,
+        isOccupied: false,
+      };
+    }
+    if (t.x === newX && t.y === newY) {
+      // pawn promo?
+      return {
+        ...t,
+        piece: promotedTo == null ? piece : promotedTo,
+        pieceColor: pieceColor,
+        isOccupied: true,
+      };
+    } else return t;
+  });
+  const inCheck = await isKingInCheck(oppColor, newBoard, false, false);
+  if (inCheck) checkNotation = "+";
+
+  // TODO
+  // CHECKMATE
+  // CASTLING
+
+  const moveNotation =
+    pieceNotation +
+    oldPosNotation +
+    captureNotation +
+    newPosNotation +
+    pawnPromoNotation +
+    checkNotation;
+  return moveNotation;
 };
