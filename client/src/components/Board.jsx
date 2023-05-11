@@ -2,7 +2,7 @@ import Tile from "./Tile";
 import { useChessStore } from "../store";
 import { useEffect, useRef } from "react";
 import { movePiece } from "../game/pieceDragAndDrop";
-import { isKingInCheck } from "../game/moves";
+import { isKingInCheck } from "../game/check";
 
 const Board = () => {
   const board = useChessStore((state) => state.board);
