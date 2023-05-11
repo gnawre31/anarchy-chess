@@ -3,10 +3,11 @@ import { getPieceSVG } from "./svg";
 import { dropPiece, grabPiece } from "../game/pieceDragAndDrop";
 import { useChessStore } from "../store";
 import { useEffect, useState } from "react";
-import { getPiece, getValidMoves, getValidMovesWhenChecked, isValidMove, isKingInCheck } from "../game/moves";
+import { getPiece, getValidMoves, getValidMovesWhenChecked, isValidMove, isKingInCheck, getMoveNotation } from "../game/moves";
 
 const Tile = ({ tile }) => {
     const {
+        turn,
         activePiece,
         setActivePiece,
         setActiveTile,
@@ -30,6 +31,7 @@ const Tile = ({ tile }) => {
         setPromoMove,
         setChecked
     } = useChessStore((state) => ({
+        turn: state.turn,
         activePiece: state.activePiece,
         setActivePiece: state.setActivePiece,
         setActiveTile: state.setActiveTile,
@@ -137,6 +139,8 @@ const Tile = ({ tile }) => {
             const dropPos = await dropPiece(e, minX, maxX, minY, maxY);
             const capturedPiece = await getPiece(dropPos.x, dropPos.y, board)
 
+            const moveNotation = await getMoveNotation(x, y, dropPos.x, dropPos.y, piece, pieceColor, capturedPiece, null, board)
+
             let action = {
                 oldX: x,
                 oldY: y,
@@ -144,8 +148,11 @@ const Tile = ({ tile }) => {
                 newY: dropPos.y,
                 piece: piece,
                 pieceColor: pieceColor,
-                capturedPiece: capturedPiece
+                capturedPiece: capturedPiece,
+                moveNotation: moveNotation,
+                turn: turn
             }
+
             const isAValidMove = await isValidMove(action, validActions)
 
 
@@ -157,7 +164,6 @@ const Tile = ({ tile }) => {
                     await setPromoMove(action)
                     await openPawnPromoModal()
                 } else {
-                    // is the king in check?
 
                     // committing move will move the piece to new tile coordinates
                     await commitMove(action)
