@@ -3,7 +3,14 @@ import { getPieceSVG } from "./svg";
 import { dropPiece, grabPiece } from "../game/pieceDragAndDrop";
 import { useChessStore } from "../store";
 import { useEffect, useState } from "react";
-import { getPiece, getValidMoves, getValidMovesWhenChecked, isValidMove, isKingInCheck, getMoveNotation } from "../game/moves";
+import {
+    getAllPossibleActions,
+    isValidAction,
+    getValidActions,
+} from "../game/actions";
+import { isKingInCheck } from "../game/check";
+import { getMoveNotation } from "../game/gameFunctions";
+import { getPiece } from "../game/helpers";
 
 const Tile = ({ tile }) => {
     const {
@@ -29,7 +36,7 @@ const Tile = ({ tile }) => {
         moveHistory,
         openPawnPromoModal,
         setPromoMove,
-        setChecked
+        setChecked,
     } = useChessStore((state) => ({
         turn: state.turn,
         activePiece: state.activePiece,
@@ -53,19 +60,22 @@ const Tile = ({ tile }) => {
         moveHistory: state.moveHistory,
         openPawnPromoModal: state.openPawnPromoModal,
         setPromoMove: state.setPromoMove,
-        setChecked: state.setChecked
-    }))
+        setChecked: state.setChecked,
+    }));
 
-    const { x, y, piece, pieceColor, isOccupied } = tile
+    const { x, y, piece, pieceColor, isOccupied } = tile;
 
-    const [checkedBorder, setCheckedBorder] = useState("")
+    const [checkedBorder, setCheckedBorder] = useState("");
     useEffect(() => {
-        if ((wChecked && piece === "KING" && pieceColor === "W") || (bChecked && piece === "KING" && pieceColor === "B")) setCheckedBorder("checked ")
-        else setCheckedBorder("")
-    }, [wChecked, bChecked, piece, pieceColor, currTurn])
+        if (
+            (wChecked && piece === "KING" && pieceColor === "W") ||
+            (bChecked && piece === "KING" && pieceColor === "B")
+        )
+            setCheckedBorder("checked ");
+        else setCheckedBorder("");
+    }, [wChecked, bChecked, piece, pieceColor, currTurn]);
 
-
-    // tile css valid move 
+    // tile css valid move
     const [tileValidMove, setTileValidMove] = useState("");
     useEffect(() => {
         const currTileIsValidMove = validActions.validMoves.find(
@@ -75,12 +85,10 @@ const Tile = ({ tile }) => {
             (a) => a.x === x && a.y === y
         );
 
-        if (currTileIsValidMove) setTileValidMove("can-move")
+        if (currTileIsValidMove) setTileValidMove("can-move");
         else if (currTileIsValidAttack) setTileValidMove("can-attack");
         else setTileValidMove("");
-
     }, [validActions, x, y, piece]);
-
 
     // tile color css class
     const [tileColor, setTileColor] = useState(null);
@@ -101,45 +109,54 @@ const Tile = ({ tile }) => {
         setTileColor(`${active}${color}-tile `);
     }, [moveHistory, activeTile, x, y]);
 
-    // piece svg 
+    // piece svg
     const [pieceSVG, setPieceSVG] = useState(null);
     useEffect(() => {
         if (isOccupied) setPieceSVG(getPieceSVG(`${pieceColor}_${piece}`));
     }, [piece, pieceColor, isOccupied]);
 
-
-
-
-
     const onClick = async (e) => {
         if (activePiece == null) {
             // PICK UP PIECE
             if (pieceColor === currTurn) {
-                let possibleActions = await getValidMoves(tile, board, canLongCastle, canShortCastle)
-                // if checked, keep only possible options that unchecks
-                const checked = (wChecked && currTurn === "W") || (bChecked && currTurn === "B")
-                if (checked) {
-                    // validate moves that unchecks the player
-                    possibleActions = await getValidMovesWhenChecked(
-                        tile,
-                        possibleActions,
-                        board,
-                        canLongCastle,
-                        canShortCastle
-                    )
-                }
+                // 1. get all possible moves and attacks
+                // 2 keep only actions that unchecks the king
+                // default possible actions
+                let validActions = await getAllPossibleActions(
+                    tile,
+                    board,
+                    canLongCastle,
+                    canShortCastle
+                );
+                validActions = await getValidActions(
+                    tile,
+                    validActions,
+                    board,
+                    canLongCastle,
+                    canShortCastle
+                );
 
-                setValidActions(possibleActions)
+                setValidActions(validActions);
                 setActivePiece(e.target);
-                setActiveTile({ x, y })
+                setActiveTile({ x, y });
                 grabPiece(e);
             }
         } else {
             // DROP PIECE
             const dropPos = await dropPiece(e, minX, maxX, minY, maxY);
-            const capturedPiece = await getPiece(dropPos.x, dropPos.y, board)
+            const capturedPiece = await getPiece(dropPos.x, dropPos.y, board);
 
-            const moveNotation = await getMoveNotation(x, y, dropPos.x, dropPos.y, piece, pieceColor, capturedPiece, null, board)
+            const moveNotation = await getMoveNotation(
+                x,
+                y,
+                dropPos.x,
+                dropPos.y,
+                piece,
+                pieceColor,
+                capturedPiece,
+                null,
+                board
+            );
 
             let action = {
                 oldX: x,
@@ -150,58 +167,60 @@ const Tile = ({ tile }) => {
                 pieceColor: pieceColor,
                 capturedPiece: capturedPiece,
                 moveNotation: moveNotation,
-                turn: turn
-            }
+                turn: turn,
+            };
 
-            const isAValidMove = await isValidMove(action, validActions)
-
+            const isAValidMove = await isValidAction(action, validActions);
 
             if (isAValidMove) {
-
-
                 //  pawn promotion
-                if (action.piece === "PAWN" && (action.newY === 0 || action.newY === 7)) {
-                    await setPromoMove(action)
-                    await openPawnPromoModal()
+                if (
+                    action.piece === "PAWN" &&
+                    (action.newY === 0 || action.newY === 7)
+                ) {
+                    await setPromoMove(action);
+                    await openPawnPromoModal();
                 } else {
-
                     // committing move will move the piece to new tile coordinates
-                    await commitMove(action)
+                    await commitMove(action);
 
                     // must verify if curr player is in check so that it can be unchecked if the player makes a move
-                    const oppColor = currTurn === "W" ? "B" : "W"
-                    const checked = await isKingInCheck(oppColor, board, canLongCastle, canShortCastle)
-                    await setChecked(checked)
+                    const oppColor = currTurn === "W" ? "B" : "W";
+                    const checked = await isKingInCheck(
+                        oppColor,
+                        board,
+                        canLongCastle,
+                        canShortCastle
+                    );
+                    await setChecked(checked);
 
                     // increment turn does the following:
                     // 1. increases turn no.
                     // 2. logs move onto moveHistory
-                    // 3. updates currTurn 
+                    // 3. updates currTurn
                     // 4. checks if piece has been captured. Update captured if so
-                    await incrementTurn(action)
+                    await incrementTurn(action);
                 }
-
             }
-
-
         }
     };
 
     return (
-        <div className={"tile " + checkedBorder + tileColor} >
+        <div className={"tile " + checkedBorder + tileColor}>
             {tileValidMove.length > 0 && <div className={tileValidMove} />}
             {isOccupied && (
                 <div
                     style={{ backgroundImage: `url(${pieceSVG})` }}
                     className="piece"
-                    onClick={(e) => onClick(e).then(() => {
-                        // reset flags if a piece was dropped
-                        if (activePiece) {
-                            setValidActions({ validMoves: [], validAttacks: [] })
-                            setActivePiece(null);
-                        }
-
-                    })}
+                    onClick={(e) =>
+                        onClick(e).then(() => {
+                            // reset flags if a piece was dropped
+                            if (activePiece) {
+                                setValidActions({ validMoves: [], validAttacks: [] });
+                                setActivePiece(null);
+                            }
+                        })
+                    }
                 />
             )}
         </div>

@@ -2,7 +2,7 @@ import PropTypes from "prop-types";
 import ReactDOM from "react-dom";
 import { useChessStore } from "../store";
 import { getPieceSVG } from "./svg";
-import { getMoveNotation } from "../game/moves";
+import { getMoveNotation } from "../game/gameFunctions";
 
 const PawnPromoModal = ({ pawnPromoModal }) => {
     const closePawnPromoModal = useChessStore(

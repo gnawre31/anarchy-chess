@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { BLACK, FILES, RANKS, WHITE } from "./types";
 import newBoard from "./newBoard.json";
-import { getScoreInc } from "./game/scoring";
+import { getScoreInc } from "./game/gameFunctions";
 
 export const useChessStore = create((set) => ({
   board: [],
