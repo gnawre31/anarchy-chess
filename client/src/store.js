@@ -34,6 +34,7 @@ export const useChessStore = create((set) => ({
   wChecked: false,
   bChecked: false,
   moveHistory: [],
+  winner: null,
 
   // board set up
   setBoard: () => {
@@ -181,6 +182,22 @@ export const useChessStore = create((set) => ({
       }),
     }));
   },
+
+  checkMate: () =>
+    set((state) => ({
+      moveHistory: state.moveHistory.map((m, i) => {
+        if (i === state.moveHistory.length - 1) {
+          const newNotation = m.moveNotation.slice(0, -1) + "#";
+          return {
+            ...m,
+            moveNotation: newNotation,
+          };
+        } else return m;
+      }),
+      isPlaying: false,
+      winner: state.wChecked ? "B" : "W",
+    })),
+  // Update chess notation of final move when player is checkmated
 
   // RESET GAME
   newGame: async (game) => {
