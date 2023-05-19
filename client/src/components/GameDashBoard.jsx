@@ -1,4 +1,5 @@
 
+import { useEffect, useState } from 'react'
 import { useChessStore } from '../store'
 import CapturedPieces from './CapturedPieces'
 import PawnPromoModal from './PawnPromoModal'
@@ -14,12 +15,40 @@ const GameDashBoard = () => {
     const pawnPromoModal = useChessStore(state => state.pawnPromoModal)
     const moveHistory = useChessStore(state => state.moveHistory)
 
+    const isPlaying = useChessStore(state => state.isPlaying)
+    const winner = useChessStore(state => state.winner)
+
+
+
     const startGame = () => {
         const game = {
             roomId: 123, gameId: 456, playerId: 789, playerColor: 'WHITE', opponentId: 1, board: board
         }
         newGame(game)
     }
+
+    const [winningMsg, setWinningMsg] = useState("")
+    useEffect(() => {
+        console.log("isPlaying", isPlaying)
+        console.log("winner", winner)
+        if (!isPlaying) {
+            let winningColor = null
+            switch (winner) {
+                case "W":
+                    winningColor = "White"
+                    break;
+                case "B":
+                    winningColor = "Black"
+                    break;
+                default:
+                    break;
+            }
+            if (winningColor) setWinningMsg(`Game over. ${winningColor} wins.`)
+            else setWinningMsg("")
+        } else setWinningMsg("")
+    }, [isPlaying, winner]
+    )
+
     return (
         <div>
             <button onClick={startGame}>New Game</button>
@@ -38,6 +67,7 @@ const GameDashBoard = () => {
                     {moveHistory.filter(m => m.turn % 2 !== 0).map((h, i) => <div key={i}>{h.moveNotation}</div>)}
                 </div>
             </div>
+            <p>{winningMsg}</p>
 
 
 

@@ -1,4 +1,4 @@
-import { getAllPossibleActions } from "./actions";
+import { getAllPossibleActions, getValidActions } from "./actions";
 
 export const isKingInCheck = async (
   pieceColor,
@@ -30,5 +30,40 @@ export const isKingInCheck = async (
       }
     }
   }
+
   return checked;
+};
+
+export const isCheckMate = async (wChecked, bChecked, board) => {
+  let playersInCheck = [];
+  if (wChecked) playersInCheck.push("W");
+  if (bChecked) playersInCheck.push("B");
+
+  for (const c of playersInCheck) {
+    const defPieces = await board.filter((t) => t.pieceColor === c);
+    for await (const p of defPieces) {
+      const possibleActions = await getAllPossibleActions(
+        p,
+        board,
+        false,
+        false
+      );
+      const validActions = await getValidActions(
+        p,
+        possibleActions,
+        board,
+        false,
+        false
+      );
+      if (
+        validActions.validMoves.length > 0 ||
+        validActions.validAttacks.length > 0
+      )
+        return false;
+    }
+  }
+  if (playersInCheck.length > 0) {
+    return true;
+  }
+  return false;
 };

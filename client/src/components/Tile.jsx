@@ -8,7 +8,6 @@ import {
     isValidAction,
     getValidActions,
 } from "../game/actions";
-import { isKingInCheck } from "../game/check";
 import { getMoveNotation } from "../game/gameFunctions";
 import { getPiece } from "../game/helpers";
 
@@ -36,7 +35,7 @@ const Tile = ({ tile }) => {
         moveHistory,
         openPawnPromoModal,
         setPromoMove,
-        setChecked,
+        isPlaying
     } = useChessStore((state) => ({
         turn: state.turn,
         activePiece: state.activePiece,
@@ -60,7 +59,7 @@ const Tile = ({ tile }) => {
         moveHistory: state.moveHistory,
         openPawnPromoModal: state.openPawnPromoModal,
         setPromoMove: state.setPromoMove,
-        setChecked: state.setChecked,
+        isPlaying: state.isPlaying,
     }));
 
     const { x, y, piece, pieceColor, isOccupied } = tile;
@@ -116,90 +115,95 @@ const Tile = ({ tile }) => {
     }, [piece, pieceColor, isOccupied]);
 
     const onClick = async (e) => {
-        if (activePiece == null) {
-            // PICK UP PIECE
-            if (pieceColor === currTurn) {
-                // 1. get all possible moves and attacks
-                // 2 keep only actions that unchecks the king
-                // default possible actions
-                let validActions = await getAllPossibleActions(
-                    tile,
-                    board,
-                    canLongCastle,
-                    canShortCastle
-                );
-                validActions = await getValidActions(
-                    tile,
-                    validActions,
-                    board,
-                    canLongCastle,
-                    canShortCastle
-                );
-
-                setValidActions(validActions);
-                setActivePiece(e.target);
-                setActiveTile({ x, y });
-                grabPiece(e);
-            }
-        } else {
-            // DROP PIECE
-            const dropPos = await dropPiece(e, minX, maxX, minY, maxY);
-            const capturedPiece = await getPiece(dropPos.x, dropPos.y, board);
-
-            const moveNotation = await getMoveNotation(
-                x,
-                y,
-                dropPos.x,
-                dropPos.y,
-                piece,
-                pieceColor,
-                capturedPiece,
-                null,
-                board
-            );
-
-            let action = {
-                oldX: x,
-                oldY: y,
-                newX: dropPos.x,
-                newY: dropPos.y,
-                piece: piece,
-                pieceColor: pieceColor,
-                capturedPiece: capturedPiece,
-                moveNotation: moveNotation,
-                turn: turn,
-            };
-
-            const isAValidMove = await isValidAction(action, validActions);
-
-            if (isAValidMove) {
-                //  pawn promotion
-                if (
-                    action.piece === "PAWN" &&
-                    (action.newY === 0 || action.newY === 7)
-                ) {
-                    await setPromoMove(action);
-                    await openPawnPromoModal();
-                } else {
-                    // committing move will move the piece to new tile coordinates
-                    await commitMove(action);
-
-                    // must verify if curr player is in check so that it can be unchecked if the player makes a move
-                    const oppColor = currTurn === "W" ? "B" : "W";
-                    const checked = await isKingInCheck(
-                        oppColor,
+        if (isPlaying) {
+            if (activePiece == null) {
+                // PICK UP PIECE
+                if (pieceColor === currTurn) {
+                    // 1. get all possible moves and attacks
+                    // 2 keep only actions that unchecks the king
+                    // default possible actions
+                    let validActions = await getAllPossibleActions(
+                        tile,
                         board,
                         canLongCastle,
                         canShortCastle
                     );
-                    await setChecked(checked);
+                    validActions = await getValidActions(
+                        tile,
+                        validActions,
+                        board,
+                        canLongCastle,
+                        canShortCastle
+                    );
 
-                    // increment turn does the following:
-                    // 1. increases turn no.
-                    // 2. logs move onto moveHistory
-                    // 3. updates currTurn
-                    // 4. checks if piece has been captured. Update captured if so
-                    await incrementTurn(action);
+                    setValidActions(validActions);
+                    setActivePiece(e.target);
+                    setActiveTile({ x, y });
+                    grabPiece(e);
+                }
+            } else {
+                // DROP PIECE
+                const dropPos = await dropPiece(e, minX, maxX, minY, maxY);
+                const capturedPiece = await getPiece(dropPos.x, dropPos.y, board);
+
+                const moveNotation = await getMoveNotation(
+                    x,
+                    y,
+                    dropPos.x,
+                    dropPos.y,
+                    piece,
+                    pieceColor,
+                    capturedPiece,
+                    null,
+                    board
+                );
+
+                let action = {
+                    oldX: x,
+                    oldY: y,
+                    newX: dropPos.x,
+                    newY: dropPos.y,
+                    piece: piece,
+                    pieceColor: pieceColor,
+                    capturedPiece: capturedPiece,
+                    moveNotation: moveNotation,
+                    turn: turn,
+                };
+
+                const isAValidMove = await isValidAction(action, validActions);
+
+                if (isAValidMove) {
+                    //  pawn promotion
+                    if (
+                        action.piece === "PAWN" &&
+                        (action.newY === 0 || action.newY === 7)
+                    ) {
+                        await setPromoMove(action);
+                        await openPawnPromoModal();
+                    } else {
+                        // committing move will move the piece to new tile coordinates
+                        await commitMove(action);
+
+                        // must verify if curr player is in check so that it can be unchecked if the player makes a move
+                        // const oppColor = currTurn === "W" ? "B" : "W";
+                        // const checked = await isKingInCheck(
+                        //     oppColor,
+                        //     board,
+                        //     canLongCastle,
+                        //     canShortCastle
+                        // );
+                        // await setChecked(checked);
+
+
+                        // increment turn does the following:
+                        // 1. increases turn no.
+                        // 2. logs move onto moveHistory
+                        // 3. updates currTurn
+                        // 4. checks if piece has been captured. Update captured if so
+                        await incrementTurn(action);
+
+
+                    }
                 }
             }
         }

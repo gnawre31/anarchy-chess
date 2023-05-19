@@ -2,7 +2,7 @@ import Tile from "./Tile";
 import { useChessStore } from "../store";
 import { useEffect, useRef } from "react";
 import { movePiece } from "../game/pieceDragAndDrop";
-import { isKingInCheck } from "../game/check";
+import { isCheckMate, isKingInCheck } from "../game/check";
 
 const Board = () => {
   const board = useChessStore((state) => state.board);
@@ -20,6 +20,9 @@ const Board = () => {
   const canShortCastle = useChessStore((state) => state.canShortCastle);
   const setChecked = useChessStore((state) => state.setChecked);
   const turn = useChessStore((state) => state.turn);
+  const wChecked = useChessStore((state) => state.wChecked);
+  const bChecked = useChessStore((state) => state.bChecked);
+  const checkMate = useChessStore((state) => state.checkMate);
 
 
 
@@ -52,8 +55,17 @@ const Board = () => {
   // set wChecked and bChecked (boolean) values whenever a move is made
   // checked values are used for tile styling
   useEffect(() => {
-    isKingInCheck(currTurn, board, canLongCastle, canShortCastle).then(checked => setChecked(checked))
-  }, [currTurn, board, canLongCastle, canShortCastle, turn, setChecked, activePiece])
+    isKingInCheck(currTurn, board, canLongCastle, canShortCastle).then(checked => {
+      setChecked(checked)
+      if (checked) {
+        isCheckMate(wChecked, bChecked, board).then(isMated => {
+          if (isMated) checkMate()
+        })
+      }
+    }
+    )
+
+  }, [wChecked, bChecked, currTurn, board, canLongCastle, canShortCastle, turn, setChecked, activePiece, checkMate])
 
 
   return (
