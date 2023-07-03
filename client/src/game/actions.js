@@ -1,6 +1,9 @@
 import { isKingInCheck } from "./check";
-import { getPiece, getTempBoard } from "./helpers";
+import { getPiece } from "./helpers";
 import {
+  getJumpingPieceMoves,
+  getPawnMoves,
+  getSlidingPieceMoves,
   validBishopMoves,
   validKingMoves,
   validKnightMoves,
@@ -9,39 +12,149 @@ import {
   validRookMoves,
 } from "./pieceRules";
 
+const getTempBoard = async (board, oldPos, newPos, piece, pieceColor) => {
+  return await board.map((tile, idx) => {
+    if (idx === oldPos) return null;
+    if (idx === newPos) return pieceColor + piece;
+    return tile;
+  });
+};
+
+const getIdxOfAllPieces = async (board, color) => {
+  return await board
+    .map((tile, idx) => {
+      if (tile && tile[0] === color) return idx;
+    })
+    .filter((idx) => idx);
+};
+
+const validateMoves = async (allMoves, board, currTurn) => {
+  let kingInCheck = false;
+  let validMoves = [];
+  for await (const move of allMoves) {
+    const pieceType = move.piece[1];
+    const pieceColor = move.piece[0];
+    // check if making the move results in a check on own king
+    const newBoard = await getTempBoard(
+      board,
+      move.oldPos,
+      move.newPos,
+      pieceType,
+      pieceColor
+    );
+
+    // opponent's turn
+    const oppColor = currTurn === "w" ? "b" : "w";
+    const oppIdxOfAllPieces = await getIdxOfAllPieces(newBoard, oppColor);
+
+    for await (const oppIdx of oppIdxOfAllPieces) {
+      if (kingInCheck) break;
+      const pieceColor = newBoard[oppIdx][0];
+      const piece = newBoard[oppIdx][1];
+      const moves = await getMoves(
+        piece,
+        pieceColor,
+        oppIdx,
+        newBoard,
+        false,
+        false
+      );
+
+      const kingUnderAtt = await isKingUnderAtt(moves);
+      if (kingUnderAtt) {
+        kingInCheck = true;
+        break;
+      }
+    }
+
+    if (!kingInCheck) validMoves.push(move);
+    kingInCheck = false;
+  }
+  return validMoves;
+};
+
+const isKingUnderAtt = async (moves) => {
+  for await (const move of moves) {
+    if (move.capturedPiece && move.capturedPiece.includes("k")) return true;
+  }
+  return false;
+};
+
+export const generateAllMoves = async (board, currTurn) => {
+  // get all possible moves
+  // keep only valid moves (does not check the king)
+  let allMoves = [];
+  let idxOfAllPieces = await getIdxOfAllPieces(board, currTurn);
+
+  for await (const idx of idxOfAllPieces) {
+    const pieceColor = board[idx][0];
+    const piece = board[idx][1];
+    const moves = await getMoves(piece, pieceColor, idx, board, false, false);
+    if (moves.length > 0) {
+      allMoves.push.apply(allMoves, moves);
+    }
+  }
+
+  const validMoves = await validateMoves(allMoves, board, currTurn);
+
+  return validMoves;
+};
 // generates list of all valid x, y coordinates
-export const getAllPossibleActions = async (
-  tile,
+export const getMoves = async (
+  piece,
+  pieceColor,
+  idx,
   board,
   canLongCastle,
   canShortCastle
 ) => {
-  const { x, y, piece, pieceColor } = tile;
-  const oppColor = pieceColor === "B" ? "W" : "B";
+  const oppColor = pieceColor === "w" ? "b" : "w";
 
   switch (piece) {
-    case "PAWN":
-      return await validPawnMoves(x, y, pieceColor, oppColor, board);
-    case "ROOK":
-      return await validRookMoves(
-        x,
-        y,
+    case "p":
+      return await getPawnMoves(piece, pieceColor, oppColor, board, idx);
+    case "r":
+    case "b":
+    case "q":
+      return await getSlidingPieceMoves(
+        piece,
         pieceColor,
         oppColor,
         board,
-        canLongCastle,
-        canShortCastle
+        idx
       );
-    case "KNIGHT":
-      return await validKnightMoves(x, y, pieceColor, oppColor, board);
-    case "BISHOP":
-      return await validBishopMoves(x, y, pieceColor, oppColor, board);
-    case "QUEEN":
-      return await validQueenMoves(x, y, pieceColor, oppColor, board);
-    case "KING":
-      return await validKingMoves(x, y, pieceColor, oppColor, board);
+    case "k":
+    case "n":
+      return await getJumpingPieceMoves(
+        piece,
+        pieceColor,
+        oppColor,
+        board,
+        idx
+      );
+
+    // case "PAWN":
+    //   return await validPawnMoves(x, y, pieceColor, oppColor, board);
+    // case "ROOK":
+    //   return await validRookMoves(
+    //     x,
+    //     y,
+    //     pieceColor,
+    //     oppColor,
+    //     board,
+    //     canLongCastle,
+    //     canShortCastle
+    //   );
+    // case "KNIGHT":
+    //   return await validKnightMoves(x, y, pieceColor, oppColor, board);
+    // case "BISHOP":
+    //   return await validBishopMoves(x, y, pieceColor, oppColor, board);
+    // case "QUEEN":
+    //   return await validQueenMoves(x, y, pieceColor, oppColor, board);
+    // case "KING":
+    //   return await validKingMoves(x, y, pieceColor, oppColor, board);
     default:
-      return { validMoves: [], validAttacks: [] };
+      return [];
   }
 };
 

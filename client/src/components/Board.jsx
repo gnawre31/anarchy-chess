@@ -3,12 +3,14 @@ import { useChessStore } from "../store";
 import { useEffect, useRef } from "react";
 import { movePiece } from "../game/pieceDragAndDrop";
 import { isCheckMate, isKingInCheck } from "../game/check";
+import { generateAllMoves } from "../game/actions";
 
 const Board = () => {
   const board = useChessStore((state) => state.board);
   const setBoard = useChessStore(state => state.setBoard)
   const activePiece = useChessStore((state) => state.activePiece);
   const setBoardCoords = useChessStore(state => state.setBoardCoords)
+  const setValidMoves = useChessStore(state => state.setValidMoves)
 
   const minX = useChessStore((state) => state.minX);
   const maxX = useChessStore((state) => state.maxX);
@@ -54,18 +56,26 @@ const Board = () => {
 
   // set wChecked and bChecked (boolean) values whenever a move is made
   // checked values are used for tile styling
-  useEffect(() => {
-    isKingInCheck(currTurn, board, canLongCastle, canShortCastle).then(checked => {
-      setChecked(checked)
-      if (checked) {
-        isCheckMate(wChecked, bChecked, board).then(isMated => {
-          if (isMated) checkMate()
-        })
-      }
-    }
-    )
+  // useEffect(() => {
+  //   isKingInCheck(currTurn, board, canLongCastle, canShortCastle).then(checked => {
+  //     setChecked(checked)
+  //     if (checked) {
+  //       isCheckMate(wChecked, bChecked, board).then(isMated => {
+  //         if (isMated) checkMate()
+  //       })
+  //     }
+  //   }
+  //   )
 
-  }, [wChecked, bChecked, currTurn, board, canLongCastle, canShortCastle, turn, setChecked, activePiece, checkMate])
+  // }, [wChecked, bChecked, currTurn, board, canLongCastle, canShortCastle, turn, setChecked, activePiece, checkMate])
+  // useEffect(() => {
+  //   console.log(currTurn)
+  //   generateAllMoves(board, currTurn).then(allMoves => {
+  //     console.log(allMoves)
+  //     setValidMoves(allMoves)
+  //   })
+  // }, [board, currTurn, setValidMoves])
+
 
 
   return (
@@ -75,10 +85,11 @@ const Board = () => {
       ref={chessboardRef}
       onMouseMove={(e) => onMove(e)}
     >
-      {board.map((tile) => (
+      {board.map((tile, idx) => (
         <Tile
-          key={tile.x + ", " + tile.y}
+          key={idx}
           tile={tile}
+          idx={idx}
         />
       ))}
     </div>

@@ -4,14 +4,15 @@ import { dropPiece, grabPiece } from "../game/pieceDragAndDrop";
 import { useChessStore } from "../store";
 import { useEffect, useState } from "react";
 import {
-    getAllPossibleActions,
+    generateAllMoves,
     isValidAction,
     getValidActions,
 } from "../game/actions";
 import { getMoveNotation } from "../game/gameFunctions";
 import { getPiece } from "../game/helpers";
+import { convertIndexToChessNotation } from "../game/tileUtils";
 
-const Tile = ({ tile }) => {
+const Tile = ({ tile, idx }) => {
     const {
         turn,
         activePiece,
@@ -19,8 +20,8 @@ const Tile = ({ tile }) => {
         setActiveTile,
         activeTile,
         commitMove,
-        setValidActions,
-        validActions,
+        setValidMoves,
+        validMoves,
         minX,
         maxX,
         minY,
@@ -43,8 +44,8 @@ const Tile = ({ tile }) => {
         setActiveTile: state.setActiveTile,
         activeTile: state.activeTile,
         commitMove: state.commitMove,
-        setValidActions: state.setValidActions,
-        validActions: state.validActions,
+        setValidMoves: state.setValidMoves,
+        validMoves: state.validMoves,
         minX: state.minX,
         maxX: state.maxX,
         minY: state.minY,
@@ -62,57 +63,65 @@ const Tile = ({ tile }) => {
         isPlaying: state.isPlaying,
     }));
 
-    const { x, y, piece, pieceColor, isOccupied } = tile;
+    const pieceColor = tile ? tile[0] : null
+    const piece = tile ? tile[1] : null
+
+
 
     const [checkedBorder, setCheckedBorder] = useState("");
     useEffect(() => {
-        if (
-            (wChecked && piece === "KING" && pieceColor === "W") ||
-            (bChecked && piece === "KING" && pieceColor === "B")
-        )
+        if (wChecked && tile === "wk" || bChecked && tile === "bk")
             setCheckedBorder("checked ");
         else setCheckedBorder("");
-    }, [wChecked, bChecked, piece, pieceColor, currTurn]);
+    }, [wChecked, bChecked, tile, currTurn]);
 
     // tile css valid move
     const [tileValidMove, setTileValidMove] = useState("");
     useEffect(() => {
-        const currTileIsValidMove = validActions.validMoves.find(
-            (m) => m.x === x && m.y === y
-        );
-        const currTileIsValidAttack = validActions.validAttacks.find(
-            (a) => a.x === x && a.y === y
-        );
+        if (activePiece) {
+            const movesForActivePiece = validMoves.filter(
+                (move) => move.oldPos === activeTile
+            );
+            const currTileIsValidMove = movesForActivePiece.find(move => move.newPos === idx)
+            if (currTileIsValidMove) {
+                if (currTileIsValidMove.capturedPiece) setTileValidMove("can-attack");
+                else setTileValidMove("can-move");
+            }
 
-        if (currTileIsValidMove) setTileValidMove("can-move");
-        else if (currTileIsValidAttack) setTileValidMove("can-attack");
-        else setTileValidMove("");
-    }, [validActions, x, y, piece]);
+            else setTileValidMove("");
+
+        } else setTileValidMove("");
+
+
+
+    }, [activePiece, activeTile, validMoves, piece, idx]);
 
     // tile color css class
     const [tileColor, setTileColor] = useState(null);
     useEffect(() => {
         let active = "";
         let color = "";
-        if (activeTile && x === activeTile.x && y === activeTile.y)
+        if (activeTile && activeTile === idx)
             active = "active-";
-        if (moveHistory.length > 0) {
-            if (
-                moveHistory[moveHistory.length - 1].newX === x &&
-                moveHistory[moveHistory.length - 1].newY === y
-            )
-                active = "active-";
-        }
-        if ((x + y) % 2 === 0) color = "black";
+        // if (moveHistory.length > 0) {
+        //     if (
+        //         moveHistory[moveHistory.length - 1].newX === x &&
+        //         moveHistory[moveHistory.length - 1].newY === y
+        //     )
+        //         active = "active-";
+        // }
+        const file = idx % 8
+        const rank = Math.floor(idx / 8)
+        if ((file + rank) % 2 === 0) color = "black";
         else color = "white";
         setTileColor(`${active}${color}-tile `);
-    }, [moveHistory, activeTile, x, y]);
+    }, [moveHistory, activeTile, idx]);
 
     // piece svg
     const [pieceSVG, setPieceSVG] = useState(null);
     useEffect(() => {
-        if (isOccupied) setPieceSVG(getPieceSVG(`${pieceColor}_${piece}`));
-    }, [piece, pieceColor, isOccupied]);
+        if (tile) setPieceSVG(getPieceSVG(`${tile}`));
+    }, [piece, pieceColor, tile]);
 
     const onClick = async (e) => {
         if (isPlaying) {
@@ -122,97 +131,106 @@ const Tile = ({ tile }) => {
                     // 1. get all possible moves and attacks
                     // 2 keep only actions that unchecks the king
                     // default possible actions
-                    let validActions = await getAllPossibleActions(
-                        tile,
-                        board,
-                        canLongCastle,
-                        canShortCastle
-                    );
-                    validActions = await getValidActions(
-                        tile,
-                        validActions,
-                        board,
-                        canLongCastle,
-                        canShortCastle
-                    );
+                    // let validActions = await generateAllMoves(
+                    //     tile,
+                    //     board,
+                    //     canLongCastle,
+                    //     canShortCastle
+                    // );
+                    // validActions = await getValidActions(
+                    //     tile,
+                    //     validActions,
+                    //     board,
+                    //     canLongCastle,
+                    //     canShortCastle
+                    // );
 
-                    setValidActions(validActions);
+                    // setValidActions(validActions);
                     setActivePiece(e.target);
-                    setActiveTile({ x, y });
+                    setActiveTile(idx);
                     grabPiece(e);
                 }
             } else {
                 // DROP PIECE
                 const dropPos = await dropPiece(e, minX, maxX, minY, maxY);
-                const capturedPiece = await getPiece(dropPos.x, dropPos.y, board);
+                // const capturedPiece = await getPiece(dropPos.x, dropPos.y, board);
+                const capturedPiece = null
 
-                const moveNotation = await getMoveNotation(
-                    x,
-                    y,
-                    dropPos.x,
-                    dropPos.y,
-                    piece,
-                    pieceColor,
-                    capturedPiece,
-                    null,
-                    board
-                );
+                const isValidMove = await validMoves.find(move => move.oldPos === activeTile && move.newPos === dropPos)
 
-                let action = {
-                    oldX: x,
-                    oldY: y,
-                    newX: dropPos.x,
-                    newY: dropPos.y,
-                    piece: piece,
-                    pieceColor: pieceColor,
-                    capturedPiece: capturedPiece,
-                    moveNotation: moveNotation,
-                    turn: turn,
-                };
-
-                const isAValidMove = await isValidAction(action, validActions);
-
-                if (isAValidMove) {
-                    //  pawn promotion
-                    if (
-                        action.piece === "PAWN" &&
-                        (action.newY === 0 || action.newY === 7)
-                    ) {
-                        await setPromoMove(action);
-                        await openPawnPromoModal();
-                    } else {
-                        // committing move will move the piece to new tile coordinates
-                        await commitMove(action);
-
-                        // must verify if curr player is in check so that it can be unchecked if the player makes a move
-                        // const oppColor = currTurn === "W" ? "B" : "W";
-                        // const checked = await isKingInCheck(
-                        //     oppColor,
-                        //     board,
-                        //     canLongCastle,
-                        //     canShortCastle
-                        // );
-                        // await setChecked(checked);
+                // const moveNotation = await getMoveNotation(
+                //     x,
+                //     y,
+                //     dropPos.x,
+                //     dropPos.y,
+                //     piece,
+                //     pieceColor,
+                //     capturedPiece,
+                //     null,
+                //     board
+                // );
+                if (isValidMove) {
+                    let move = {
+                        oldPos: idx,
+                        newPos: dropPos,
+                        piece: piece,
+                        pieceColor: pieceColor,
+                        capturedPiece: capturedPiece,
+                        // moveNotation: moveNotation,
+                        // turn: turn,
+                    };
+                    await commitMove(move, board)
+                    await incrementTurn(move)
 
 
-                        // increment turn does the following:
-                        // 1. increases turn no.
-                        // 2. logs move onto moveHistory
-                        // 3. updates currTurn
-                        // 4. checks if piece has been captured. Update captured if so
-                        await incrementTurn(action);
-
-
-                    }
                 }
+
+
+
+                // const isAValidMove = await isValidAction(action, validActions);
+
+                // if (isAValidMove) {
+                //     //  pawn promotion
+                //     if (
+                //         action.piece === "PAWN" &&
+                //         (action.newY === 0 || action.newY === 7)
+                //     ) {
+                //         await setPromoMove(action);
+                //         await openPawnPromoModal();
+                //     } else {
+                //         // committing move will move the piece to new tile coordinates
+                //         await commitMove(action);
+
+                //         // must verify if curr player is in check so that it can be unchecked if the player makes a move
+                //         // const oppColor = currTurn === "W" ? "B" : "W";
+                //         // const checked = await isKingInCheck(
+                //         //     oppColor,
+                //         //     board,
+                //         //     canLongCastle,
+                //         //     canShortCastle
+                //         // );
+                //         // await setChecked(checked);
+
+
+                //         // increment turn does the following:
+                //         // 1. increases turn no.
+                //         // 2. logs move onto moveHistory
+                //         // 3. updates currTurn
+                //         // 4. checks if piece has been captured. Update captured if so
+                //         await incrementTurn(action);
+
+
+                //     }
+                // }
             }
         }
     };
 
+
     return (
-        <div className={"tile " + checkedBorder + tileColor}>
+        <div className={"tile " + checkedBorder + tileColor} onClick={() => console.log(idx)}>
             {tileValidMove.length > 0 && <div className={tileValidMove} />}
-            {isOccupied && (
+            {tile && (
                 <div
                     style={{ backgroundImage: `url(${pieceSVG})` }}
                     className="piece"
@@ -220,7 +238,7 @@ const Tile = ({ tile }) => {
                         onClick(e).then(() => {
                             // reset flags if a piece was dropped
                             if (activePiece) {
-                                setValidActions({ validMoves: [], validAttacks: [] });
+                                // setValidActions({ validMoves: [], validAttacks: [] });
                                 setActivePiece(null);
                             }
                         })
@@ -232,14 +250,8 @@ const Tile = ({ tile }) => {
 };
 
 Tile.propTypes = {
-    tile: PropTypes.shape({
-        x: PropTypes.number.isRequired,
-        y: PropTypes.number.isRequired,
-        pos: PropTypes.string.isRequired,
-        piece: PropTypes.string,
-        pieceColor: PropTypes.string,
-        isOccupied: PropTypes.bool.isRequired,
-    }),
+    tile: PropTypes.string,
+    idx: PropTypes.number.isRequired,
 };
 
 export default Tile;

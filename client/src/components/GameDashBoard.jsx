@@ -6,7 +6,7 @@ import PawnPromoModal from './PawnPromoModal'
 
 const GameDashBoard = () => {
     const newGame = useChessStore(state => state.newGame)
-    const board = useChessStore(state => state.board)
+    const validMoves = useChessStore(state => state.validMoves)
     const currTurn = useChessStore(state => state.currTurn)
     const turn = useChessStore(state => state.turn)
     const capturedBPieces = useChessStore(state => state.capturedBPieces)
@@ -22,15 +22,13 @@ const GameDashBoard = () => {
 
     const startGame = () => {
         const game = {
-            roomId: 123, gameId: 456, playerId: 789, playerColor: 'WHITE', opponentId: 1, board: board
+            roomId: 123, gameId: 456, playerId: 789, playerColor: 'w', opponentId: 1
         }
         newGame(game)
     }
 
     const [winningMsg, setWinningMsg] = useState("")
     useEffect(() => {
-        console.log("isPlaying", isPlaying)
-        console.log("winner", winner)
         if (!isPlaying) {
             let winningColor = null
             switch (winner) {
@@ -52,12 +50,12 @@ const GameDashBoard = () => {
     return (
         <div>
             <button onClick={startGame}>New Game</button>
-            <p>Current player: <b>{currTurn === "W" ? "White" : "Black"}</b></p>
+            <p>Current player: <b>{currTurn === "w" ? "White" : "Black"}</b></p>
             <p>Turn: {turn}</p>
             <p>White:</p>
-            <CapturedPieces pieces={capturedBPieces} color="B" />
+            <CapturedPieces pieces={capturedBPieces} color="b" />
             <p>Black:</p>
-            <CapturedPieces pieces={capturedWPieces} color="W" />
+            <CapturedPieces pieces={capturedWPieces} color="w" />
             <PawnPromoModal pawnPromoModal={pawnPromoModal} />
             <div style={{ display: "flex" }}>
                 <div style={{ marginRight: "24px" }}>
@@ -68,6 +66,9 @@ const GameDashBoard = () => {
                 </div>
             </div>
             <p>{winningMsg}</p>
+            <div>{validMoves.map((m, idx) => (<div key={idx}>
+                <p>{m.piece} {m.oldPos} to {m.newPos} {m.capturedPiece}</p>
+            </div>))}</div>
 
 
 

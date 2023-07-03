@@ -47,12 +47,13 @@ export const movePiece = (e, activePiece, minX, maxX, minY, maxY) => {
 export const dropPiece = async (e, minX, maxX, minY, maxY) => {
   const activePiece = e.target;
   const x = Math.floor(((e.clientX - minX) * 8) / (maxX - minX));
-  const y = 7 - Math.floor(((e.clientY - minY) * 8) / (maxY - minY));
+  const y = Math.floor(((e.clientY - minY) * 8) / (maxY - minY));
+  const idx = y * 8 + x;
   activePiece.style.position = "relative";
   activePiece.style.removeProperty("top");
   activePiece.style.removeProperty("left");
   activePiece.style.removeProperty("height");
   activePiece.style.removeProperty("width");
   activePiece.style.removeProperty("zIndex");
-  return { x, y };
+  return idx;
 };

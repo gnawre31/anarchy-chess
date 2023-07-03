@@ -1,4 +1,173 @@
+import { isEdgeIdx } from "./boardUtils";
 import { getPiece, isTileEmpty, isTileOccupiedByOpp } from "./helpers";
+
+export const getPawnMoves = async (piece, pieceColor, oppColor, board, idx) => {
+  const colorMod = pieceColor === "w" ? -1 : 1;
+  let moves = [];
+
+  // move up by 1
+  let newIdx = idx + 8 * colorMod;
+  if (newIdx >= 0 && newIdx <= 63) {
+    if (board[newIdx] === null) {
+      moves.push({
+        piece: pieceColor + piece,
+        capturedPiece: null,
+        oldPos: idx,
+        newPos: newIdx,
+      });
+    }
+  }
+
+  // move up by 2
+  if (moves.length > 0) {
+    newIdx += 8 * colorMod;
+    const rank = Math.floor(idx / 8);
+    if (rank === 1 || rank === 6) {
+      if (board[newIdx] === null) {
+        moves.push({
+          piece: pieceColor + piece,
+          capturedPiece: null,
+          oldPos: idx,
+          newPos: newIdx,
+        });
+      }
+    }
+  }
+
+  // capture diagonally
+  const idxIncrements = [7 * colorMod, 9 * colorMod];
+  for await (const inc of idxIncrements) {
+    const newIdx = idx + inc;
+
+    if (newIdx < 0 || newIdx > 63) continue;
+    if (board[newIdx] === null) continue;
+    if (board[newIdx][0] === pieceColor) continue;
+    // EN PASSANT TBD
+    else
+      moves.push({
+        piece: pieceColor + piece,
+        capturedPiece: board[newIdx],
+        oldPos: idx,
+        newPos: newIdx,
+      });
+  }
+
+  return moves;
+};
+
+export const getSlidingPieceMoves = async (
+  piece,
+  pieceColor,
+  oppColor,
+  board,
+  idx
+) => {
+  let moves = [];
+  let idxIncrements;
+  switch (piece) {
+    case "r":
+      idxIncrements = [-1, 8, 1, -8];
+      break;
+    case "b":
+      idxIncrements = [-9, -7, 9, 7];
+      break;
+    case "q":
+      idxIncrements = [-1, -7, 8, 9, 1, 7, -8, -9];
+      break;
+    default:
+      idxIncrements = [];
+  }
+
+  for (const inc of idxIncrements) {
+    let newIdx = idx;
+
+    while (newIdx >= 0 && newIdx < 64) {
+      newIdx += inc;
+
+      // out of bounds
+      if (newIdx > 63 || newIdx < 0) break;
+
+      // tile is occupied by same color piece
+      if (board[newIdx] && board[newIdx][0] === pieceColor) break;
+      let move = {
+        piece: pieceColor + piece,
+        capturedPiece: null,
+        oldPos: idx,
+        newPos: newIdx,
+      };
+      if (board[newIdx] && board[newIdx][0] === oppColor) {
+        move.capturedPiece = board[newIdx];
+        moves.push(move);
+        break;
+      }
+
+      moves.push(move);
+
+      // reached the edge, stop loop
+      if (isEdgeIdx(newIdx, inc)) break;
+    }
+  }
+
+  return moves;
+};
+
+export const getJumpingPieceMoves = async (
+  piece,
+  pieceColor,
+  oppColor,
+  board,
+  idx
+) => {
+  let moves = [];
+  let idxIncrements;
+  switch (piece) {
+    case "n":
+      idxIncrements = [-10, -17, -15, -6, 10, 17, 15, 6];
+      break;
+    case "k":
+      idxIncrements = [-1, -7, 8, 9, 1, 7, -8, -9];
+      break;
+    default:
+      idxIncrements = [];
+  }
+
+  for await (const inc of idxIncrements) {
+    const newIdx = idx + inc;
+    // out of bounds
+    if (newIdx > 63 || newIdx < 0) continue;
+
+    // tile is occupied by same color piece
+    if (board[newIdx] && board[newIdx][0] === pieceColor) continue;
+
+    let move = {
+      piece: pieceColor + piece,
+      capturedPiece: null,
+      oldPos: idx,
+      newPos: newIdx,
+    };
+
+    // possible capture
+    if (board[newIdx] && board[newIdx][0] === oppColor) {
+      move.capturedPiece = board[newIdx];
+    }
+
+    // determine possible indices
+    const fileDifference = Math.abs((newIdx % 8) - (idx % 8));
+    const rankDifference = Math.abs(
+      Math.floor(newIdx / 8) - Math.floor(idx / 8)
+    );
+
+    if (fileDifference <= 2 && rankDifference <= 2) {
+      if (
+        (piece === "n" && fileDifference + rankDifference === 3) ||
+        piece === "k"
+      )
+        moves.push(move);
+    }
+  }
+
+  return moves;
+};
 
 export const validPawnMoves = async (x, y, pieceColor, oppColor, board) => {
   // only valid move is one that unchecks the king

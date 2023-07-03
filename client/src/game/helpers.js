@@ -1,4 +1,4 @@
-import { getAllPossibleActions } from "./actions";
+import { getMoves } from "./actions";
 
 export const getTempBoard = async (
   oldX,
@@ -59,7 +59,7 @@ export const multiplePiecesCanMoveToSameSpot = async (
   );
   if (otherPieces.length > 0) {
     for await (const p of otherPieces) {
-      const actions = await getAllPossibleActions(p, board, false, false);
+      const actions = await getMoves(p, board, false, false);
       const sameMove = await actions.validMoves.find(
         (m) => m.x === newX && m.y === newY
       );

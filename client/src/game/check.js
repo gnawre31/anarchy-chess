@@ -1,4 +1,4 @@
-import { getAllPossibleActions, getValidActions } from "./actions";
+import { generateAllMoves, getValidActions } from "./actions";
 
 export const isKingInCheck = async (
   pieceColor,
@@ -17,7 +17,7 @@ export const isKingInCheck = async (
   // 5. if king is part of attack, then the curr player is in check
 
   for await (const p of attPieces) {
-    const validActions = await getAllPossibleActions(
+    const validActions = await generateAllMoves(
       p,
       board,
       canShortCastle,
@@ -42,12 +42,7 @@ export const isCheckMate = async (wChecked, bChecked, board) => {
   for (const c of playersInCheck) {
     const defPieces = await board.filter((t) => t.pieceColor === c);
     for await (const p of defPieces) {
-      const possibleActions = await getAllPossibleActions(
-        p,
-        board,
-        false,
-        false
-      );
+      const possibleActions = await generateAllMoves(p, board, false, false);
       const validActions = await getValidActions(
         p,
         possibleActions,

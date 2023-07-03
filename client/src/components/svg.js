@@ -14,29 +14,29 @@ import W_KING_SVG from "../assets/w-king.svg";
 
 export const getPieceSVG = (piece) => {
   switch (piece) {
-    case "B_PAWN":
+    case "bp":
       return B_PAWN_SVG;
-    case "B_ROOK":
+    case "br":
       return B_ROOK_SVG;
-    case "B_BISHOP":
+    case "bb":
       return B_BISHOP_SVG;
-    case "B_KNIGHT":
+    case "bn":
       return B_KNIGHT_SVG;
-    case "B_QUEEN":
+    case "bq":
       return B_QUEEN_SVG;
-    case "B_KING":
+    case "bk":
       return B_KING_SVG;
-    case "W_PAWN":
+    case "wp":
       return W_PAWN_SVG;
-    case "W_ROOK":
+    case "wr":
       return W_ROOK_SVG;
-    case "W_BISHOP":
+    case "wb":
       return W_BISHOP_SVG;
-    case "W_KNIGHT":
+    case "wn":
       return W_KNIGHT_SVG;
-    case "W_QUEEN":
+    case "wq":
       return W_QUEEN_SVG;
-    case "W_KING":
+    case "wk":
       return W_KING_SVG;
   }
 };
