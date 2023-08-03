@@ -89,7 +89,6 @@ export const flipBoard = async (board) => {
     if (board[i] == null) continue;
     // put piece into flipped position
     const newPos = getFlippedPos(i);
-    console.log(i, board[i], newPos);
     newBoard[newPos] = board[i];
   }
   // return board;

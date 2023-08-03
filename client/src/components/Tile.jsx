@@ -120,6 +120,7 @@ const Tile = ({ tile, idx }) => {
     // piece svg
     const [pieceSVG, setPieceSVG] = useState(null);
     useEffect(() => {
+        console.log(tile)
         if (tile) setPieceSVG(getPieceSVG(`${tile}`));
     }, [piece, pieceColor, tile]);
 
@@ -179,8 +180,17 @@ const Tile = ({ tile, idx }) => {
                         // moveNotation: moveNotation,
                         // turn: turn,
                     };
-                    await commitMove(move, board)
-                    await incrementTurn(move)
+                    // pawn promotion
+
+                    if (move.piece === 'p' && Math.floor(move.newPos / 8) === 0) {
+                        await setPromoMove(move)
+                        await openPawnPromoModal()
+
+                    } else {
+                        await commitMove(move, board)
+                        await incrementTurn(move)
+                    }
+
 
 
                 }

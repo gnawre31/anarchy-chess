@@ -15,7 +15,7 @@ const PawnPromoModal = ({ pawnPromoModal }) => {
     const incrementTurn = useChessStore((state) => state.incrementTurn);
     const board = useChessStore((state) => state.board);
 
-    const pieces = ["KNIGHT", "BISHOP", "ROOK", "QUEEN"];
+    const pieces = ["n", "b", "r", "q"];
 
     const closeModal = async () => {
         await setPromoMove(null);
@@ -23,11 +23,17 @@ const PawnPromoModal = ({ pawnPromoModal }) => {
     };
 
     const promotePawn = async (piece) => {
-        const { oldX, oldY, newX, newY, pieceColor, capturedPiece } = promoMove
-        const moveNotation = await getMoveNotation(oldX, oldY, newX, newY, "PAWN", pieceColor, capturedPiece, piece, board)
+        // oldPos: idx,
+        //                 newPos: dropPos,
+        //                 piece: piece,
+        //                 pieceColor: pieceColor,
+        //                 capturedPiece: capturedPiece,
+        // const { oldPos, newPos, pieceColor, capturedPiece } = promoMove
+        // console.log(piece)
+        // const moveNotation = await getMoveNotation(oldX, oldY, newX, newY, "p", pieceColor, capturedPiece, piece, board)
 
-        await commitMove({ ...promoMove, piece: piece, moveNotation: moveNotation });
-        await incrementTurn({ ...promoMove, piece: piece, moveNotation: moveNotation });
+        await commitMove({ ...promoMove, piece: piece }, board);
+        await incrementTurn({ ...promoMove, piece: piece });
         closeModal();
     };
     return ReactDOM.createPortal(
@@ -36,7 +42,7 @@ const PawnPromoModal = ({ pawnPromoModal }) => {
                 <div onClick={closeModal} className="modal-container">
                     <div onClick={(e) => e.stopPropagation()} className="modal">
                         {pieces.map((p, idx) => {
-                            const svgURL = getPieceSVG(currTurn + "_" + p);
+                            const svgURL = getPieceSVG(currTurn + p);
                             return (
                                 <div
                                     key={idx}
