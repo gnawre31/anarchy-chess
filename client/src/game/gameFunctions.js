@@ -1,4 +1,4 @@
-import { isKingInCheck } from "./check";
+// import { isKingInCheck } from "./check";
 import { getTempBoard, multiplePiecesCanMoveToSameSpot } from "./helpers";
 
 export const getScoreInc = (capturedColor, capturedPiece) => {

@@ -174,18 +174,26 @@ export const useChessStore = create((set) => ({
     });
 
     const nextColor = pieceColor === "w" ? "b" : "w";
+
+    // get all valid moves for the next color
     const validMoves = await generateAllMoves(newBoard, nextColor);
 
-    // // check
-    // const nextTurnValidMoves = await generateAllMoves(newBoard, pieceColor);
-    // const isKingInCheck = nextTurnValidMoves.filter(
-    //   (move) => move.capturedPiece !== null && move.capturedPiece.includes("k")
-    // );
-    // if (isKingInCheck.length > 0) console.log("check");
+    // check if opponent's king is under attack
+    let wChecked = false;
+    let bChecked = false;
+    const sameColorValidMoves = await generateAllMoves(newBoard, pieceColor);
+    sameColorValidMoves.forEach((m) => {
+      if (m.capturedPiece === "bk") bChecked = true;
+      if (m.capturedPiece === "wk") wChecked = true;
+    });
+
+    //
 
     set(() => ({
       board: newBoard,
       validMoves: validMoves,
+      wChecked: wChecked,
+      bChecked: bChecked,
     }));
   },
 

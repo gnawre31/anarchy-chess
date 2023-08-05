@@ -3,14 +3,14 @@ import { getPieceSVG } from "./svg";
 import { dropPiece, grabPiece } from "../game/pieceDragAndDrop";
 import { useChessStore } from "../store";
 import { useEffect, useState } from "react";
-import {
-    generateAllMoves,
-    isValidAction,
-    getValidActions,
-} from "../game/actions";
-import { getMoveNotation } from "../game/gameFunctions";
-import { getPiece } from "../game/helpers";
-import { convertIndexToChessNotation } from "../game/tileUtils";
+// import {
+//     generateAllMoves,
+//     isValidAction,
+//     getValidActions,
+// } from "../game/actions";
+// import { getMoveNotation } from "../game/gameFunctions";
+// import { getPiece } from "../game/helpers";
+// import { convertIndexToChessNotation } from "../game/tileUtils";
 
 const Tile = ({ tile, idx }) => {
     const {
@@ -120,7 +120,7 @@ const Tile = ({ tile, idx }) => {
     // piece svg
     const [pieceSVG, setPieceSVG] = useState(null);
     useEffect(() => {
-        console.log(tile)
+        // console.log(tile)
         if (tile) setPieceSVG(getPieceSVG(`${tile}`));
     }, [piece, pieceColor, tile]);
 
